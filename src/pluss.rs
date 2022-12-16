@@ -2,12 +2,15 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use anyhow::anyhow;
 
 #[derive(Debug)]
-struct MissRatio {
-    data: Vec<(usize, f64)>,
+pub struct DumpedData {
+    pub(crate) data: Vec<(usize, f64)>,
 }
 
-impl MissRatio {
-    fn new<R>(mut input: R) -> anyhow::Result<Self>
+impl DumpedData {
+    pub fn data(&self) -> &[(usize, f64)] {
+        self.data.as_slice()
+    }
+    pub fn new<R>(mut input: R) -> anyhow::Result<Self>
     where
         R: std::io::Read,
     {
@@ -15,7 +18,7 @@ impl MissRatio {
         let mut buf = String::new();
         input.read_to_string(&mut buf)?;
         let flag = AtomicBool::new(true);
-        let data = buf
+        let data : Vec<(usize, f64)> = buf
             .par_lines()
             .filter(|x| x.contains(','))
             .map(|x: &str| {
@@ -41,7 +44,8 @@ impl MissRatio {
             })
             .collect();
         if flag.load(Ordering::Relaxed) {
-            Ok(MissRatio { data })
+            log::info!("{} data points loaded", data.len());
+            Ok(DumpedData { data })
         } else {
             Err(anyhow!("failed to parse input"))
         }
@@ -50,17 +54,20 @@ impl MissRatio {
 
 #[cfg(test)]
 mod test {
-    use crate::pluss::MissRatio;
+    use crate::pluss::DumpedData;
 
     #[test]
     fn basic_deserialize() -> anyhow::Result<()> {
         let data = r#"
-        0 , 1.0
-        1 , 0.02
-        2 , 0.98
+1, 1059850.0
+2, 1456590.0
+4, 2437730.0
+8, 4409820.0
+16, 2588550.0
+32, 141462.0
         "#
         .to_string();
-        let t = MissRatio::new(data.as_bytes())?;
+        let t = DumpedData::new(data.as_bytes())?;
         Ok(println!("{:?}", t))
     }
 }
