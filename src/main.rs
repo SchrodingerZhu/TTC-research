@@ -40,25 +40,19 @@ fn main() -> anyhow::Result<()> {
             .margin(5)
             .x_label_area_size(30)
             .y_label_area_size(30)
-            .build_cartesian_2d(
-                0..last.0+1,
-                0.0..last.1+1.0,
-            )?;
+            .build_cartesian_2d(0..last.0 + 1, 0.0..last.1 + 1.0)?;
         chart.configure_mesh().draw()?;
 
         chart
-        .draw_series(LineSeries::new(
-                ttc,
-            RED,
-        ))?
-        .label("TTC")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], RED));
+            .draw_series(LineSeries::new(ttc, RED))?
+            .label("TTC")
+            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], RED));
 
         chart
-        .configure_series_labels()
-        .background_style(WHITE.mix(0.8))
-        .border_style(BLACK)
-        .draw()?;
+            .configure_series_labels()
+            .background_style(WHITE.mix(0.8))
+            .border_style(BLACK)
+            .draw()?;
 
         canvas.present()?;
     }

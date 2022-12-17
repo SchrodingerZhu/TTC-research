@@ -3,11 +3,11 @@ use std::path::PathBuf;
 use clap::Parser;
 #[derive(Debug, Parser)]
 pub struct CliOpt {
-    #[arg(long, short='p', help = "Render the TTC curve")]
+    #[arg(long, short = 'p', help = "Render the TTC curve")]
     pub plot: Option<PathBuf>,
-    #[arg(long, short='W', help = "Plot width")]
+    #[arg(long, short = 'W', help = "Plot width")]
     pub plot_width: Option<u32>,
-    #[arg(long, short='H', help = "Plot height")]
+    #[arg(long, short = 'H', help = "Plot height")]
     pub plot_height: Option<u32>,
     #[arg(long, short, default_value = "64", help = "Maximum cache size")]
     pub max_cache_size: usize,
