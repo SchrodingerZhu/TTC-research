@@ -104,8 +104,8 @@ impl<'a> ReuseDist<'a> {
         let ex = self.cond_exp(x)?;
         let ey = self.cond_exp(y)?;
         let e1 = self.cond_exp(1)?;
-        let a = y as f64 * self.ccdf[y] + (ey - e1) as f64;
-        let b = x as f64 * self.ccdf[x] + (ex - e1) as f64;
+        let a = y as f64 * self.ccdf[y] + (ey - e1);
+        let b = x as f64 * self.ccdf[x] + (ex - e1);
         Some(a / b)
     }
 }
