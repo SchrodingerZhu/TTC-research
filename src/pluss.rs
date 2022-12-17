@@ -18,7 +18,7 @@ impl DumpedData {
         let mut buf = String::new();
         input.read_to_string(&mut buf)?;
         let flag = AtomicBool::new(true);
-        let data: Vec<(usize, f64)> = buf
+        let mut data: Vec<(usize, f64)> = buf
             .par_lines()
             .filter(|x| x.contains(','))
             .map(|x: &str| {
@@ -43,6 +43,7 @@ impl DumpedData {
                 x.ok()
             })
             .collect();
+        data.par_sort_unstable_by_key(|x| x.0);
         if flag.load(Ordering::Relaxed) {
             log::info!("{} data points loaded", data.len());
             Ok(DumpedData { data })

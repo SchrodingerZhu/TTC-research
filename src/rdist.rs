@@ -1,21 +1,21 @@
 use crate::pluss::DumpedData;
 
 #[derive(Debug)]
-pub struct ReuseDist {
-    original: Vec<(usize, f64)>,
+pub struct ReuseDist<'a> {
+    pub original: &'a [(usize, f64)],
     // probability density
-    pdf: Vec<f64>,
+    pub pdf: Vec<f64>,
     // cumulative density
-    cdf: Vec<f64>,
+    pub cdf: Vec<f64>,
     // accumulated expectation
-    aexp: Vec<f64>,
+    pub aexp: Vec<f64>,
     // complement cumulative density
-    ccdf: Vec<f64>,
+    pub ccdf: Vec<f64>,
     // accumulated complement cumulative density
-    accdf: Vec<f64>,
+    pub accdf: Vec<f64>,
 }
 
-impl<'a> From<&'a DumpedData> for ReuseDist {
+impl<'a> From<&'a DumpedData> for ReuseDist<'a> {
     fn from(value: &'a DumpedData) -> Self {
         use rayon::prelude::*;
         let data = value.data();
@@ -50,7 +50,6 @@ impl<'a> From<&'a DumpedData> for ReuseDist {
             }
             {
                 // update standard distribution
-                let prev = pdf[i - 1];
                 let current = data[j - 1];
                 if current.0 > i {
                     pdf.push(0.0);
@@ -66,7 +65,7 @@ impl<'a> From<&'a DumpedData> for ReuseDist {
             }
         }
         Self {
-            original: data.to_vec(),
+            original: data,
             pdf,
             cdf,
             aexp,
@@ -76,13 +75,12 @@ impl<'a> From<&'a DumpedData> for ReuseDist {
     }
 }
 
-impl ReuseDist {
+impl<'a> ReuseDist<'a> {
     pub fn max_reuse_distance(&self) -> usize {
         self.ccdf.len() - 1
     }
     pub fn aet(&self, cache_size: usize) -> Option<usize> {
-        let pt = self.accdf
-            .partition_point(|x| (*x as usize) < cache_size);
+        let pt = self.accdf.partition_point(|x| (*x as usize) < cache_size);
         if pt < self.max_reuse_distance() {
             Some(pt)
         } else {
@@ -93,15 +91,13 @@ impl ReuseDist {
         self.aexp.get(reuse_interval).cloned()
     }
     pub fn reuse_interval_boundaries(&self, cache_size: usize) -> Option<(usize, usize)> {
-        self.aet(cache_size).and_then(|aet| {
-            let pt = self.original
-                .partition_point(|x| x.0 < aet);
-            pt.checked_sub(1)
-        }).and_then(|idx| {
-            self.original.get(idx).map(|x| (idx, x.0))
-        }).and_then(|(idx, lower)| {
-            self.original.get(idx + 1).map(|x|(lower, x.0))
-        })
+        self.aet(cache_size)
+            .and_then(|aet| {
+                let pt = self.original.partition_point(|x| x.0 < aet);
+                pt.checked_sub(1)
+            })
+            .and_then(|idx| self.original.get(idx).map(|x| (idx, x.0)))
+            .and_then(|(idx, lower)| self.original.get(idx + 1).map(|x| (lower, x.0)))
     }
     pub fn thread_tolerance(&self, cache_size: usize) -> Option<f64> {
         let (x, y) = self.reuse_interval_boundaries(cache_size)?;
