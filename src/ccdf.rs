@@ -6,8 +6,8 @@ pub struct CCDF {
     pub accumulation: Vec<f64>,
 }
 
-impl From<DumpedData> for CCDF {
-    fn from(value: DumpedData) -> Self {
+impl<'a> From<&'a DumpedData> for CCDF  {
+    fn from(value: &'a DumpedData) -> Self {
         use rayon::prelude::*;
         let data = value.data();
         let max: usize = data.last().map(|x| x.0).unwrap_or(0);
@@ -65,7 +65,7 @@ mod test {
                 (32, 141462.0),
             ],
         };
-        let x = CCDF::from(data);
+        let x = CCDF::from(&data);
         println!("{:#?}", x);
         assert_eq!(x.max_reuse_distance(), 32);
         assert_eq!(x.aet(2), Some(2));
