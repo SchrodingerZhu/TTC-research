@@ -42,8 +42,7 @@ impl CCDF {
         self.distribution.len() - 1
     }
     pub fn aet(&self, cache_size: usize) -> Option<usize> {
-        self
-            .accumulation
+        self.accumulation
             .binary_search_by_key(&cache_size, |x| *x as usize)
             .ok()
     }
