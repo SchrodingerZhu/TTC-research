@@ -2,6 +2,7 @@ use crate::pluss::DumpedData;
 
 #[derive(Debug)]
 pub struct ReuseDist {
+    original: Vec<(usize, f64)>,
     // probability density
     pdf: Vec<f64>,
     // cumulative density
@@ -65,6 +66,7 @@ impl<'a> From<&'a DumpedData> for ReuseDist {
             }
         }
         Self {
+            original: data.to_vec(),
             pdf,
             cdf,
             aexp,
@@ -79,9 +81,36 @@ impl ReuseDist {
         self.ccdf.len() - 1
     }
     pub fn aet(&self, cache_size: usize) -> Option<usize> {
-        self.accdf
-            .binary_search_by_key(&cache_size, |x| *x as usize)
-            .ok()
+        let pt = self.accdf
+            .partition_point(|x| (*x as usize) < cache_size);
+        if pt < self.max_reuse_distance() {
+            Some(pt)
+        } else {
+            None
+        }
+    }
+    pub fn cond_exp(&self, reuse_interval: usize) -> Option<f64> {
+        self.aexp.get(reuse_interval).cloned()
+    }
+    pub fn reuse_interval_boundaries(&self, cache_size: usize) -> Option<(usize, usize)> {
+        self.aet(cache_size).and_then(|aet| {
+            let pt = self.original
+                .partition_point(|x| x.0 < aet);
+            pt.checked_sub(1)
+        }).and_then(|idx| {
+            self.original.get(idx).map(|x| (idx, x.0))
+        }).and_then(|(idx, lower)| {
+            self.original.get(idx + 1).map(|x|(lower, x.0))
+        })
+    }
+    pub fn thread_tolerance(&self, cache_size: usize) -> Option<f64> {
+        let (x, y) = self.reuse_interval_boundaries(cache_size)?;
+        let ex = self.cond_exp(x)?;
+        let ey = self.cond_exp(y)?;
+        let e1 = self.cond_exp(1)?;
+        let a = y as f64 * self.ccdf[y] + (ey - e1) as f64;
+        let b = x as f64 * self.ccdf[x] + (ex - e1) as f64;
+        Some(a / b)
     }
 }
 
@@ -113,6 +142,8 @@ mod test {
         // when cache is too large, the aet is undefined
         assert_eq!(x.aet(16), None);
         assert_eq!(x.aet(32), None);
+        println!("{:?}", x.reuse_interval_boundaries(4));
+        println!("{:?}", x.thread_tolerance(2));
         Ok(())
     }
 }
