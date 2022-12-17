@@ -1,5 +1,5 @@
-use std::sync::atomic::{AtomicBool, Ordering};
 use anyhow::anyhow;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 #[derive(Debug)]
 pub struct DumpedData {
@@ -18,7 +18,7 @@ impl DumpedData {
         let mut buf = String::new();
         input.read_to_string(&mut buf)?;
         let flag = AtomicBool::new(true);
-        let data : Vec<(usize, f64)> = buf
+        let data: Vec<(usize, f64)> = buf
             .par_lines()
             .filter(|x| x.contains(','))
             .map(|x: &str| {
