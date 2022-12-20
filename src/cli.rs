@@ -22,4 +22,6 @@ pub struct CliOpt {
     pub input: PathBuf,
     #[arg(long, short, help = "Output path")]
     pub output: Option<PathBuf>,
+    #[arg(long, short, help = "Use bitmap instead of SVG")]
+    pub bitmap: bool,
 }
