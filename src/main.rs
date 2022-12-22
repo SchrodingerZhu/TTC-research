@@ -16,11 +16,12 @@ macro_rules! draw_graph {
         .into_drawing_area();
         canvas.fill(&WHITE)?;
         let last = $ttc.last().cloned().unwrap_or((0, 0.0));
+        let max = $ttc.iter().map(|x| x.1 as usize + 1).max().unwrap_or(2) as f64;
         let mut chart = ChartBuilder::on(&canvas)
             .margin(5)
             .x_label_area_size(30)
             .y_label_area_size(30)
-            .build_cartesian_2d(0..last.0 + 1, 0.0..last.1 + 1.0)?;
+            .build_cartesian_2d(0..last.0 + 1, 0.0..max + 1.0)?;
         chart.configure_mesh().draw()?;
 
         chart
