@@ -47,12 +47,24 @@ fn main() -> anyhow::Result<()> {
     let dist = rdist::ReuseDist::from(&parsed);
     let mut ttc = Vec::new();
     for i in (2..=cli.max_cache_size).step_by(cli.cache_size_step) {
-        if let Some(x) = dist.thread_tolerance(i) {
-            ttc.push((i, x));
+
+        match dist.thread_tolerance(i) {
+            None => {
+                log::warn!("TTC is not well defined from cache size {}", i);
+                break;
+            },
+            Some((c1, c2)) => {
+                ttc.push((i, c1, c2, c2 / c1));
+            },
+        }
+        /*
+        if let (c1, c2) = dist.thread_tolerance(i) {
+            ttc.push((i, c1, c2, c2 / c1));
         } else {
             log::warn!("TTC is not well defined from cache size {}", i);
             break;
         }
+        */
     }
     let json = simd_json::to_string(&ttc)?;
     if let Some(path) = cli.output {
@@ -60,11 +72,18 @@ fn main() -> anyhow::Result<()> {
     } else {
         log::info!("{}", json);
     }
+    
+    // put the cache size and ttc element into the new vector for plotting
+    let mut ttc_vec = Vec::new();  
+    for (i, _, _, ttc_val) in ttc {
+        ttc_vec.push((i, ttc_val));
+    }
+
     if let Some(path) = cli.plot {
         if cli.bitmap {
-            draw_graph!(BitMapBackend, path, cli, ttc);
+            draw_graph!(BitMapBackend, path, cli, ttc_vec);
         } else {
-            draw_graph!(SVGBackend, path, cli, ttc);
+            draw_graph!(SVGBackend, path, cli, ttc_vec);
         }
     }
     Ok(())

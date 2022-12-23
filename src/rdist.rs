@@ -99,14 +99,14 @@ impl<'a> ReuseDist<'a> {
             .and_then(|idx| self.original.get(idx).map(|x| (idx, x.0)))
             .and_then(|(idx, lower)| self.original.get(idx + 1).map(|x| (lower, x.0)))
     }
-    pub fn thread_tolerance(&self, cache_size: usize) -> Option<f64> {
+    pub fn thread_tolerance(&self, cache_size: usize) -> Option<(f64, f64)> {
         let (x, y) = self.reuse_interval_boundaries(cache_size)?;
         let ex = self.cond_exp(x)?;
         let ey = self.cond_exp(y)?;
         let e1 = self.cond_exp(1)?;
         let a = y as f64 * self.ccdf[y] + (ey - e1);
         let b = x as f64 * self.ccdf[x] + (ex - e1);
-        Some(a / b)
+        Some((b, a))
     }
 }
 
