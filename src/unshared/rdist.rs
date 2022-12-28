@@ -1,4 +1,4 @@
-use crate::pluss::DumpedData;
+use super::pluss::DumpedData;
 
 #[derive(Debug)]
 pub struct ReuseDist<'a> {

@@ -61,7 +61,7 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 	for program in args.benchmarks:
 		for t in args.thread_cnts:
-			cmd = f"TTC_LOG=INFO {TARGET}/ttc --input {DATA}/{program}-t{t}-pin-rih-0.data -m {args.cache} -o {JSON}/{program}-t{t}-ttc.json "
+			cmd = f"TTC_LOG=INFO {TARGET}/ttc unshared --input {DATA}/{program}-t{t}-pin-rih-0.data -m {args.cache} -o {JSON}/{program}-t{t}-ttc.json "
 			print(f"run {cmd} ...")
 			proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 			stdout, stderr = proc.communicate()

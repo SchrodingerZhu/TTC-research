@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use clap::Parser;
 #[derive(Debug, Parser)]
-pub struct CliOpt {
+pub struct UnSharedCliOpt {
     #[arg(long, short = 'p', help = "Render the TTC curve")]
     pub plot: Option<PathBuf>,
     #[arg(long, short = 'W', help = "Plot width")]
