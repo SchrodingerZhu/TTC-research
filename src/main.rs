@@ -1,5 +1,6 @@
 use clap::Parser;
 
+mod shared;
 mod unshared;
 
 #[derive(Debug, Parser)]

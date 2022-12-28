@@ -55,7 +55,7 @@ impl DumpedData {
 
 #[cfg(test)]
 mod test {
-    use crate::pluss::DumpedData;
+    use crate::unshared::pluss::DumpedData;
 
     #[test]
     fn basic_deserialize() -> anyhow::Result<()> {

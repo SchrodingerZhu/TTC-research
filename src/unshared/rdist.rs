@@ -112,8 +112,8 @@ impl<'a> ReuseDist<'a> {
 
 #[cfg(test)]
 mod test {
-    use crate::pluss::DumpedData;
-    use crate::rdist::ReuseDist;
+    use crate::unshared::pluss::DumpedData;
+    use crate::unshared::rdist::ReuseDist;
 
     #[test]
     fn basic() -> anyhow::Result<()> {
