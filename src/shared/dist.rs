@@ -7,14 +7,14 @@ pub struct DistWithSharing {
     total_dist: Dist,
     shared_cardinality: usize,
     total_samples: f64,
-    shared_samples: f64
+    shared_samples: f64,
 }
 
 impl DistWithSharing {
     pub fn new(dumped_data: DumppedData) -> Self {
         let shared_cardinality = dumped_data.shared.len();
-        let shared_samples = dumped_data.shared.iter().map(|x|x.1).sum::<f64>();
-        let total_samples = dumped_data.local.iter().map(|x|x.1).sum::<f64>() + shared_samples;
+        let shared_samples = dumped_data.shared.iter().map(|x| x.1).sum::<f64>();
+        let total_samples = dumped_data.local.iter().map(|x| x.1).sum::<f64>() + shared_samples;
         let mut data: Vec<(usize, f64)> =
             dumped_data.local.into_iter().map(|x| (x.0, x.1)).collect();
         data.sort_by_key(|x| x.0);
@@ -30,7 +30,7 @@ impl DistWithSharing {
             total_dist,
             shared_cardinality,
             total_samples,
-            shared_samples
+            shared_samples,
         }
     }
 
@@ -44,7 +44,10 @@ impl DistWithSharing {
         let local_weight = (self.total_samples - self.shared_samples) / self.total_samples;
         let shared_weight = 1.0 - local_weight;
         let target_cdf = self.total_dist.cdf.get(aet)?; // miss ratio = 1 - target_cdf
-        let shared_aet = self.local_dist.cdf.partition_point(|x| x * local_weight + shared_weight < *target_cdf); // first index i with CDF_NBD(i) >= target cdf (CDF_RaceTrack(R_N))
+        let shared_aet = self
+            .local_dist
+            .cdf
+            .partition_point(|x| x * local_weight + shared_weight < *target_cdf); // first index i with CDF_NBD(i) >= target cdf (CDF_RaceTrack(R_N))
         if shared_aet >= self.local_dist.max_reuse_distance() || shared_aet >= aet {
             None
         } else {
