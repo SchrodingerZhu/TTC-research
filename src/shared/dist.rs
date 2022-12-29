@@ -73,7 +73,7 @@ impl DistWithSharing {
                 let e1 = self.total_dist.cond_exp(1)?;
                 let a = y as f64 * self.total_dist.ccdf[y] + (ey - e1);
                 let b = x as f64 * self.total_dist.ccdf[x] + (ex - e1);
-                Some((b, a))
+                Some((a, b))
             }
             Some(shared_aet) => {
                 let index_y = self.total_dist.original.partition_point(|x| x.0 < aet);
