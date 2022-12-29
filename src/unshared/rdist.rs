@@ -1,8 +1,8 @@
 use super::pluss::DumpedData;
 
 #[derive(Debug)]
-pub struct ReuseDist<'a> {
-    pub original: &'a [(usize, f64)],
+pub struct ReuseDist {
+    pub original: Vec<(usize, f64)>,
     // probability density
     pub pdf: Vec<f64>,
     // cumulative density
@@ -15,10 +15,10 @@ pub struct ReuseDist<'a> {
     pub accdf: Vec<f64>,
 }
 
-impl<'a> From<&'a DumpedData> for ReuseDist<'a> {
-    fn from(value: &'a DumpedData) -> Self {
+impl From<DumpedData> for ReuseDist {
+    fn from(data: DumpedData) -> Self {
         use rayon::prelude::*;
-        let data = value.data();
+        let data = data.data;
         let max: usize = data.last().map(|x| x.0).unwrap_or(0);
         let accesses: f64 = data.par_iter().map(|x| x.1).sum();
         let mut pdf = vec![0.0];
@@ -75,7 +75,7 @@ impl<'a> From<&'a DumpedData> for ReuseDist<'a> {
     }
 }
 
-impl<'a> ReuseDist<'a> {
+impl ReuseDist {
     pub fn max_reuse_distance(&self) -> usize {
         self.ccdf.len() - 1
     }
@@ -127,7 +127,7 @@ mod test {
                 (32, 141462.0),
             ],
         };
-        let x = ReuseDist::from(&data);
+        let x = ReuseDist::from(data);
         println!("{:#?}", x);
         assert_eq!(x.max_reuse_distance(), 32);
         assert_eq!(x.aet(2), Some(2));

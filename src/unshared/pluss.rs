@@ -7,9 +7,6 @@ pub struct DumpedData {
 }
 
 impl DumpedData {
-    pub fn data(&self) -> &[(usize, f64)] {
-        self.data.as_slice()
-    }
     pub fn new<R>(mut input: R) -> anyhow::Result<Self>
     where
         R: std::io::Read,
