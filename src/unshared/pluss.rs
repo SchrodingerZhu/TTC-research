@@ -41,6 +41,7 @@ impl DumpedData {
             })
             .collect();
         data.par_sort_unstable_by_key(|x| x.0);
+        data = crate::util::merge_overlapped(data);
         if flag.load(Ordering::Relaxed) {
             log::info!("{} data points loaded", data.len());
             Ok(DumpedData { data })

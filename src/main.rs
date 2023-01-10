@@ -3,7 +3,7 @@ use clap::Parser;
 
 mod shared;
 mod unshared;
-
+mod util;
 use std::path::PathBuf;
 
 #[macro_export]

@@ -24,6 +24,8 @@ impl DistWithSharing {
             .into_iter()
             .map(|x| (x.0, x.1))
             .collect_into(&mut data);
+        data.sort_by_key(|x| x.0);
+        data = crate::util::merge_overlapped(data);
         let total_dist = Dist::from(Data { data });
         Self {
             local_dist,
