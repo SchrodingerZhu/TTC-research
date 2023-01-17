@@ -3,11 +3,11 @@ pub type Dist = crate::unshared::UnsharedDist;
 pub type Data = crate::unshared::UnsharedData;
 
 pub struct DistWithSharing {
-    local_dist: Dist,
-    total_dist: Dist,
-    shared_cardinality: usize,
-    total_samples: f64,
-    shared_samples: f64,
+    pub local_dist: Dist,
+    pub total_dist: Dist,
+    pub shared_cardinality: usize,
+    pub total_samples: f64,
+    pub shared_samples: f64,
 }
 
 impl DistWithSharing {

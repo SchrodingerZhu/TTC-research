@@ -17,7 +17,7 @@ pub fn routine(cli: &crate::CliOpt) -> anyhow::Result<()> {
                 break;
             }
             Some((c1, c2)) => {
-                ttc.push((i, c1, c2, c2 / c1));
+                ttc.push((i, c1, c2, c2 / c1, dist.ccdf[i]));
             }
         }
     }
@@ -30,7 +30,7 @@ pub fn routine(cli: &crate::CliOpt) -> anyhow::Result<()> {
 
     // put the cache size and ttc element into the new vector for plotting
     let mut ttc_vec = Vec::new();
-    for (i, _, _, ttc_val) in ttc {
+    for (i, _, _, ttc_val, _) in ttc {
         ttc_vec.push((i, ttc_val));
     }
 
