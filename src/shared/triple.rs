@@ -7,13 +7,13 @@ pub struct DumppedData {
 }
 
 impl DumppedData {
-    pub fn new<R>(mut input: R) -> anyhow::Result<Self>
+    pub fn new<R>(mut input: R) -> Self
     where
         R: std::io::Read,
     {
         let mut buf = String::new();
         let mut shared = false;
-        input.read_to_string(&mut buf)?;
+        input.read_to_string(&mut buf).expect("failed to read data");
         let mut shared_data = Vec::new();
         let mut local_data = Vec::new();
         for i in buf.trim().lines() {
@@ -32,27 +32,31 @@ impl DumppedData {
             let x = split
                 .next()
                 .ok_or_else(|| anyhow::anyhow!("missing first field"))
-                .and_then(|x| x.trim().parse().map_err(Into::into))?;
+                .and_then(|x| x.trim().parse().map_err(Into::into));
             let y = split
                 .next()
                 .ok_or_else(|| anyhow::anyhow!("missing first field"))
-                .and_then(|x| x.trim().parse().map_err(Into::into))?;
+                .and_then(|x| x.trim().parse().map_err(Into::into));
             let z = split
                 .next()
                 .ok_or_else(|| anyhow::anyhow!("missing first field"))
-                .and_then(|x| x.trim().parse().map_err(Into::into))?;
-            if shared {
-                shared_data.push((x, y, z));
+                .and_then(|x| x.trim().parse().map_err(Into::into));
+            if let (Ok(x), Ok(y), Ok(z)) = (x, y, z) {
+                if shared {
+                    shared_data.push((x, y, z));
+                } else {
+                    local_data.push((x, y, z));
+                }
             } else {
-                local_data.push((x, y, z));
+                continue;
             }
         }
         shared_data.sort_by_key(|x| x.0);
         local_data.sort_by_key(|x| x.0);
-        Ok(Self {
+        Self {
             shared: shared_data,
             local: local_data,
-        })
+        }
     }
 }
 
@@ -77,6 +81,7 @@ pub(in crate::shared) mod test {
     #[test]
     fn test() {
         let input = r#"
+bla
 No share reuses
 Start to dump reuse time
 512,1.83501e+06,0.225013
@@ -88,7 +93,7 @@ Share reuses
 Start to dump reuse time
 32768,253952,1
         "#;
-        let dumpped_data = super::DumppedData::new(input.as_bytes()).unwrap();
+        let dumpped_data = super::DumppedData::new(input.as_bytes());
         println!("{:?}", dumpped_data);
     }
 }

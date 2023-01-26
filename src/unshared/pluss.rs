@@ -1,5 +1,4 @@
 use anyhow::anyhow;
-use std::sync::atomic::{AtomicBool, Ordering};
 
 #[derive(Debug)]
 pub struct DumpedData {
@@ -7,14 +6,13 @@ pub struct DumpedData {
 }
 
 impl DumpedData {
-    pub fn new<R>(mut input: R) -> anyhow::Result<Self>
+    pub fn new<R>(mut input: R) -> Self
     where
         R: std::io::Read,
     {
         use rayon::prelude::*;
         let mut buf = String::new();
-        input.read_to_string(&mut buf)?;
-        let flag = AtomicBool::new(true);
+        input.read_to_string(&mut buf).expect("failed to read data");
         let mut data: Vec<(usize, f64)> = buf
             .par_lines()
             .filter(|x| x.contains(','))
@@ -34,7 +32,6 @@ impl DumpedData {
             })
             .filter_map(|x| {
                 if let Err(ref e) = x {
-                    flag.store(false, Ordering::SeqCst);
                     log::error!("error parsing input: {}", e)
                 }
                 x.ok()
@@ -42,12 +39,8 @@ impl DumpedData {
             .collect();
         data.par_sort_unstable_by_key(|x| x.0);
         data = crate::util::merge_overlapped(data);
-        if flag.load(Ordering::Relaxed) {
-            log::info!("{} data points loaded", data.len());
-            Ok(DumpedData { data })
-        } else {
-            Err(anyhow!("failed to parse input"))
-        }
+        log::info!("{} data points loaded", data.len());
+        DumpedData { data }
     }
 }
 
@@ -66,7 +59,7 @@ mod test {
 32, 141462.0
         "#
         .to_string();
-        let t = DumpedData::new(data.as_bytes())?;
+        let t = DumpedData::new(data.as_bytes());
         Ok(println!("{:?}", t))
     }
 }

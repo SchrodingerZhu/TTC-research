@@ -7,7 +7,7 @@ pub(crate) type UnsharedData = pluss::DumpedData;
 pub fn routine(cli: &crate::CliOpt) -> anyhow::Result<()> {
     use plotters::prelude::*;
     let data = std::fs::File::open(&cli.input)?;
-    let parsed = pluss::DumpedData::new(data)?;
+    let parsed = pluss::DumpedData::new(data);
     let dist = rdist::ReuseDist::from(parsed);
     let mut ttc = Vec::new();
     for i in (2..=cli.max_cache_size).step_by(cli.cache_size_step) {

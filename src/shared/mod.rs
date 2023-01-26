@@ -4,7 +4,7 @@ mod triple;
 pub fn routine(cli: &crate::CliOpt) -> anyhow::Result<()> {
     use plotters::prelude::*;
     let data = std::fs::File::open(&cli.input)?;
-    let parsed = triple::DumppedData::new(data)?;
+    let parsed = triple::DumppedData::new(data);
     let dist = dist::DistWithSharing::new(parsed);
     let mut ttc = Vec::new();
     let nonshared_weight = 1.0 - dist.shared_samples / dist.total_samples;
